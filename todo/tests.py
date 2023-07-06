@@ -28,7 +28,7 @@ class TaskModelTestCase(TestCase):
         self.assertFalse(task.completed)
         self.assertEqual(task.due_at, None)
 
-    def is_overdue_future(self):
+    def test_is_is_overdue_future(self):
         due = timezone.make_aware(datetime(2023, 6, 30, 23, 59, 59))
         current = timezone.make_aware(datetime(2023, 6, 30, 0, 0, 0))
         task = Task(title="task1", due_at=due)
@@ -48,7 +48,7 @@ class TodoViewTestCase(TestCase):
     def test_index_post(self):
         client = Client()
         data = {'title':'Test Task','due_at':'2023-06-30 23:59:59'}
-        response = client.get('/', data)
+        response = client.post('/', data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.templates[0].name, 'todo/index.html')
@@ -60,7 +60,7 @@ class TodoViewTestCase(TestCase):
         task2=Task(title='task2', due_at=timezone.make_aware(datetime(2023, 8, 1)))
         task2.save()
         client = Client()
-        response = client.get('/order=post')
+        response = client.get('/?order=post')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.templates[0].name, 'todo/index.html')
@@ -73,9 +73,9 @@ class TodoViewTestCase(TestCase):
         task2=Task(title='task2', due_at=timezone.make_aware(datetime(2023, 8, 1)))
         task2.save()
         client = Client()
-        response = client.get('/order=due')
+        response = client.get('/?order=due')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.templates[0].name, 'todo/index.html')
-        self.assertEqual(response.context['tasks'][0], task2)
-        self.assertEqual(response.context['tasks'][1], task1)
+        self.assertEqual(response.context['tasks'][0], task1)
+        self.assertEqual(response.context['tasks'][1], task2)
